@@ -24,7 +24,7 @@ At the top of the BotCheck file, you'll also find a variable that enables your b
 
 These variables are sufficiently commented for their use.
 
-## KNOWN ISSUES:
+## Known Issues:
 
 - Speedrun.com discord social links may use the old 4 digit discriminator format. These legacy usernames aren't currently available to the discord botting API, and may never be as Discord aims to step away from the discriminator formatting.
 
