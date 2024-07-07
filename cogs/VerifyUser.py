@@ -77,6 +77,11 @@ class Verify(commands.Cog):
         # get verified role information
         roleID = [role for role in ctx.guild.roles if role.name == verifiedRoleName]
 
+        # failed to find role
+        if len(roleID) == 0:
+            await ctx.respond("Can't find role to give verified users", ephemeral = True)
+            return False
+
         # user's SRC account has existed for >=6 months
         if self.SRCSixMonthCheck():
             await ctx.respond("Verified: Six Months")
