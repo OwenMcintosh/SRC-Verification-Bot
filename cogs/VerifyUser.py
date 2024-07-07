@@ -78,14 +78,14 @@ class Verify(commands.Cog):
         roleID = [role for role in ctx.guild.roles if role.name == verifiedRoleName]
 
         # user's SRC account has existed for >=6 months
-        if await self.SRCSixMonthCheck():
+        if self.SRCSixMonthCheck():
             await ctx.respond("Verified: Six Months")
             await ctx.author.add_roles(roleID[0])
             return
 
 
         # user's SRC account has a verified run for atleast one of the required games
-        if await self.GameCheck():
+        if self.GameCheck():
             await ctx.respond("Verified: Runner")
             await ctx.author.add_roles(roleID[0])
             return
@@ -95,33 +95,33 @@ class Verify(commands.Cog):
         await ctx.respond("You have not met any verification criteria.", ephemeral = True)
         return
 
-    async def SRCLinkCheck(self, ctx):
+    def SRCLinkCheck(self, ctx):
             
-            # check for any social media links where networkId = discord
-            socialMediaConnections = [item for item in self.Data['userSocialConnectionList'] if item['networkId'] == NetworkId.DISCORD]
+        # check for any social media links where networkId = discord
+        socialMediaConnections = [item for item in self.Data['userSocialConnectionList'] if item['networkId'] == NetworkId.DISCORD]
 
-            # no discord social link found
-            if(len(socialMediaConnections) == 0):
-                return DiscordSocialLink.NoConnection
-            
+        # no discord social link found
+        if(len(socialMediaConnections) == 0):
+            return DiscordSocialLink.NoConnection
+        
 
-            # get possible discriminator zone
-            discriminator = (socialMediaConnections[0])['value'][-5:]
+        # get possible discriminator zone
+        discriminator = (socialMediaConnections[0])['value'][-5:]
 
-            # check if the first character of the last five is '#' and the rest are digits (old style username with discriminator)
-            if discriminator[0] == '#' and discriminator[1:].isdigit():
-                return DiscordSocialLink.OldConnection
+        # check if the first character of the last five is '#' and the rest are digits (old style username with discriminator)
+        if discriminator[0] == '#' and discriminator[1:].isdigit():
+            return DiscordSocialLink.OldConnection
 
 
-            # is of new style, yet doesn't match current discord username
-            if((socialMediaConnections[0])['value'] != ctx.author.name):
-                return DiscordSocialLink.NoMatch
-            
+        # is of new style, yet doesn't match current discord username
+        if((socialMediaConnections[0])['value'] != ctx.author.name):
+            return DiscordSocialLink.NoMatch
+        
 
-            # social link found and matches current discord username
-            return DiscordSocialLink.TrueConnection
+        # social link found and matches current discord username
+        return DiscordSocialLink.TrueConnection
 
-    async def SRCSixMonthCheck(self):
+    def SRCSixMonthCheck(self):
     
         # Get the current date and time
         self.currentTime = datetime.now()
@@ -135,7 +135,7 @@ class Verify(commands.Cog):
         
         return True
     
-    async def DiscordXWeekCheck(self, ctx):
+    def DiscordXWeekCheck(self, ctx):
 
         # Get the current date and time
         self.currentTime = datetime.now()
@@ -145,12 +145,11 @@ class Verify(commands.Cog):
 
         # if joined date epoch is greater than the epoch x weeks ago from current time, then x weeks haven't passed (lower value = closer to Jan 1st. 1970)
         if ctx.author.joined_at.timestamp() > xWeeksAgo.timestamp():
-            print("Joined Less Than X Weeks Ago")
             return False
         
         return True
 
-    async def GameCheck(self):
+    def GameCheck(self):
     
         # all game ids the SRC user has a verified run of that we are interested in (How do you get pending runs?)
         found_ids = [game['gameId'] for game in self.Data['userGameRunnerStats'] if game['gameId'] in gameList]
@@ -175,7 +174,7 @@ class Verify(commands.Cog):
             return
         
         # user has been in the discord server for >= x Weeks
-        if await self.DiscordXWeekCheck(ctx):
+        if self.DiscordXWeekCheck(ctx):
             await ctx.respond("Verified: Two Weeks Joined")
             await ctx.author.add_roles(roleID[0])
             return
