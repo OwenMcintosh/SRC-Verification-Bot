@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import bridge, commands, tasks
 
+# Bot target server
 serverID = 841470692070522900
 
 description = """
