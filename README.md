@@ -22,7 +22,7 @@ At the top of the BotCheck file, you'll also find a variable that enables your b
 
 - serverID
 
-These variables are sufficiently commented for their use.
+These variables are sufficiently commented for their uses.
 
 ## Known Issues:
 
