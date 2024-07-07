@@ -57,7 +57,7 @@ class Verify(commands.Cog):
             return
 
         # confirm if SRC account has discord social media link
-        discordLinkStatus = await self.SRCLinkCheck(ctx)
+        discordLinkStatus = self.SRCLinkCheck(ctx)
 
         # handle errors based on speedrun.com profile's discord social link
         match discordLinkStatus:
