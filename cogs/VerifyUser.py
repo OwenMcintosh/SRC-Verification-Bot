@@ -51,7 +51,7 @@ class Verify(commands.Cog):
         
         # user has been in the discord server for >= x Weeks
         if self.DiscordXWeekCheck(ctx):
-            await ctx.respond("Verified: Two Weeks Joined")
+            await ctx.respond("Verified: Discord user join date for this server has surpassed the minimum requirement.")
             await ctx.author.add_roles(roleID[0])
             return
         
@@ -112,14 +112,14 @@ class Verify(commands.Cog):
 
         # user's SRC account has existed for >=6 months
         if self.SRCXMonthCheck():
-            await ctx.respond("Verified: Six Months")
+            await ctx.respond("Verified: Speedrun.com profile age has passed the minimum month check.")
             await ctx.author.add_roles(roleID[0])
             return
 
 
         # user's SRC account has a verified run for atleast one of the required games
         if self.GameCheck():
-            await ctx.respond("Verified: Runner")
+            await ctx.respond("Verified: Speedrun.com profile has a verified run for atleast one of the required games.")
             await ctx.author.add_roles(roleID[0])
             return
 
