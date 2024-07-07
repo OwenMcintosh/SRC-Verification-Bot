@@ -1,0 +1,2 @@
+# ignore 'vars' directory
+.env
