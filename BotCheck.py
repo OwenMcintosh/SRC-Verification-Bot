@@ -1,59 +1,44 @@
 import os
 from dotenv import load_dotenv
 import discord
-from discord.ext import bridge, commands, tasks
-
-# Bot target server
-serverID = 841470692070522900
+from discord.ext import commands, tasks
 
 description = """
 Self-verification tool for linking Discord users to their Speedrun.com profiles.
 """
 
-intents = discord.Intents.default()
-intents.members = True
-intents.message_content = True
-
-client = bridge.Bot(
-   command_prefix="/",
-   description=description,
-   intents=intents,
-   debug_guilds=[serverID]
-)
+bot = discord.Bot()
 
 status = [
    "Online!"
 ]
 
 
-@client.event
+@bot.event
 async def on_ready():
    print("Bot is now online!!")
    change_status.start()
    
 
-@client.event
+@bot.event
 async def on_command_error(error):
    if isinstance(error, commands.CommandOnCooldown):
-       print("error1")
+       print("Cooldown Error")
    elif isinstance(error, commands.DisabledCommand):
-       print("error2")
+       print("Disabled Command")
    elif isinstance(error, commands.CommandNotFound):
-       print("error3")
+       print("Not Found")
 
 
 @tasks.loop(hours=24)
 async def change_status():
 
-
-   await client.change_presence(activity=discord.Game((status[0])))
+   await bot.change_presence(activity=discord.Game((status[0])))
    print("Changed status to " + status[0])
 
 
-for filename in os.listdir("./cogs"):
-   if filename.endswith("py"):
-       client.load_extension("cogs." + filename[:-3])
-
 load_dotenv()
 
-client.run(os.getenv("DISCORD_API_KEY"))
+bot.load_extensions("cogs")
+
+bot.run(os.getenv("DISCORD_API_KEY"))

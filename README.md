@@ -18,10 +18,6 @@ At the top of the VerifyUser cog file, you'll find a few variables that can be c
 - monthCheck
 - gameList
 
-At the top of the BotCheck file, you'll also find a variable that enables your bot to target a specific server;
-
-- serverID
-
 These variables are sufficiently commented for their uses.
 
 ## Known Issues:

@@ -1,11 +1,12 @@
+import discord
 from speedruncompy import GetUserSummary, NetworkId, SitePowerLevel
 from datetime import datetime
-from discord.ext import bridge, commands
+from discord.ext import commands
 from enum import Enum
 from dateutil.relativedelta import relativedelta
 
 # how many weeks to check for discord account server join date 
-discordTimeCheckInSeconds = 2    
+discordWeekCheck = 2    
 
 # discord role name
 verifiedRoleName = "RoleNameHere"
@@ -16,6 +17,7 @@ monthCheck = 6
 # SRC ID list for each game to be checked
 gameList = ['game', 'ids', 'go', 'here']
 
+# Discord Social Link States
 class DiscordSocialLink(Enum):
     NoConnection = 0
     OldConnection = 1
@@ -24,13 +26,39 @@ class DiscordSocialLink(Enum):
 
 
 class Verify(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+
+    def __init__(self, bot):
+        self.bot = bot
         self.Data = None
         self.currentTime = None
     
-    # Comments
-    @bridge.bridge_command(name="verify-user-src", description="Verify The User Via Their SRC Profile")
+
+    @discord.slash_command(name="verify-user-discord", description="Verify The User Via Their Discord Join Date")
+    async def DISVerifyUser(self, ctx):
+
+        # get verified role information
+        roleID = [role for role in ctx.guild.roles if role.name == verifiedRoleName]
+        
+        # failed to find role
+        if len(roleID) == 0:
+            await ctx.respond("The role: \"" + verifiedRoleName + "\" does not exist.", ephemeral = True)
+            return
+
+        # Already has been verified
+        if any([role for role in ctx.author.roles if role.name == verifiedRoleName]):
+            await ctx.respond("You are already verified.", ephemeral = True)
+            return
+        
+        # user has been in the discord server for >= x Weeks
+        if self.DiscordXWeekCheck(ctx):
+            await ctx.respond("Verified: Two Weeks Joined")
+            await ctx.author.add_roles(roleID[0])
+            return
+        
+        await ctx.respond("You have not been in this server long enough to be verified via join time.")
+        return
+    
+    @discord.slash_command(name="verify-user-src", description="Verify The User Via Their SRC Profile")
     async def SRCVerifyUser(self, ctx, src_username = None):
         
         # Already verified
@@ -79,11 +107,11 @@ class Verify(commands.Cog):
 
         # failed to find role
         if len(roleID) == 0:
-            await ctx.respond("Can't find role to give verified users", ephemeral = True)
-            return False
+            await ctx.respond("The role: \"" + verifiedRoleName + "\" does not exist.", ephemeral = True)
+            return
 
         # user's SRC account has existed for >=6 months
-        if self.SRCSixMonthCheck():
+        if self.SRCXMonthCheck():
             await ctx.respond("Verified: Six Months")
             await ctx.author.add_roles(roleID[0])
             return
@@ -100,6 +128,7 @@ class Verify(commands.Cog):
         await ctx.respond("You have not met any verification criteria.", ephemeral = True)
         return
 
+    # check speedrun.com profile for discord social link
     def SRCLinkCheck(self, ctx):
             
         # check for any social media links where networkId = discord
@@ -126,7 +155,8 @@ class Verify(commands.Cog):
         # social link found and matches current discord username
         return DiscordSocialLink.TrueConnection
 
-    def SRCSixMonthCheck(self):
+    # check if verified speedrun.com profile has existed for X number of months
+    def SRCXMonthCheck(self):
     
         # Get the current date and time
         self.currentTime = datetime.now()
@@ -140,20 +170,7 @@ class Verify(commands.Cog):
         
         return True
     
-    def DiscordXWeekCheck(self, ctx):
-
-        # Get the current date and time
-        self.currentTime = datetime.now()
-
-        # calculate date for x weeks ago
-        xWeeksAgo = self.currentTime - relativedelta(weeks=2)
-
-        # if joined date epoch is greater than the epoch x weeks ago from current time, then x weeks haven't passed (lower value = closer to Jan 1st. 1970)
-        if ctx.author.joined_at.timestamp() > xWeeksAgo.timestamp():
-            return False
-        
-        return True
-
+    # check if verified speedrun.com profile has a verified run from any of our desired game list
     def GameCheck(self):
     
         # all game ids the SRC user has a verified run of that we are interested in (How do you get pending runs?)
@@ -165,24 +182,23 @@ class Verify(commands.Cog):
         
         return True
 
+    # check if discord user has been within the server for X number of weeks
+    def DiscordXWeekCheck(self, ctx):
 
+        # Get the current date and time
+        self.currentTime = datetime.now()
 
-    @bridge.bridge_command(name="verify-user-discord", description="Verify The User Via Their Discord Join Date")
-    async def DISVerifyUser(self, ctx):
+        # calculate date for x weeks ago
+        xWeeksAgo = self.currentTime - relativedelta(weeks=discordWeekCheck)
 
-        # get verified role information
-        roleID = [role for role in ctx.guild.roles if role.name == verifiedRoleName]
+        # if joined date epoch is greater than the epoch x weeks ago from current time, then x weeks haven't passed (lower value = closer to Jan 1st. 1970)
+        if ctx.author.joined_at.timestamp() > xWeeksAgo.timestamp():
+            return False
         
-        # Already has been verified
-        if any([role for role in ctx.author.roles if role.name == verifiedRoleName]):
-            await ctx.respond("You are already verified.", ephemeral = True)
-            return
-        
-        # user has been in the discord server for >= x Weeks
-        if self.DiscordXWeekCheck(ctx):
-            await ctx.respond("Verified: Two Weeks Joined")
-            await ctx.author.add_roles(roleID[0])
-            return
+        return True
+
+
+
 
 
 def setup(client):
